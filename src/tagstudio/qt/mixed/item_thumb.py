@@ -12,7 +12,7 @@ import structlog
 from PIL import Image, ImageQt
 from PySide6.QtCore import QEvent, QMimeData, QSize, Qt, QUrl
 from PySide6.QtGui import QAction, QDrag, QEnterEvent, QGuiApplication, QMouseEvent, QPixmap
-from PySide6.QtWidgets import QBoxLayout, QCheckBox, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QBoxLayout, QCheckBox, QHBoxLayout, QLabel, QVBoxLayout, QWidget, QGridLayout
 
 from tagstudio.core.constants import TAG_ARCHIVED, TAG_FAVORITE
 from tagstudio.core.library.alchemy.enums import ItemType
@@ -121,21 +121,25 @@ class ItemThumb(FlowWidget):
         self.thumb_size: tuple[int, int] = thumb_size
         self.show_filename_label: bool = show_filename_label
         self.label_height = 12
+        self.label_width = thumb_size[0]
         self.label_spacing = 4
+        self.label_orientation = 3 #TB:0,LR:1,BT:2,RL:3
         self.setMinimumSize(*thumb_size)
         self.setMaximumSize(*thumb_size)
         self.setMouseTracking(True)
         check_size = 24
         self.setFixedSize(
-            thumb_size[0],
+            thumb_size[0]
+            + ((self.label_width + self.label_spacing) if show_filename_label and self.label_orientation % 2 == 1 else 0),
             thumb_size[1]
-            + ((self.label_height + self.label_spacing) if show_filename_label else 0),
+            + ((self.label_height + self.label_spacing) if show_filename_label and self.label_orientation % 2 == 0 else 0),
         )
 
         self.thumb_container = QWidget()
-        self.base_layout = QVBoxLayout(self)
+        self.base_layout = QGridLayout(self)
         self.base_layout.setContentsMargins(0, 0, 0, 0)
-        self.base_layout.setSpacing(0)
+        self.base_layout.setVerticalSpacing(self.label_spacing)
+        self.base_layout.setHorizontalSpacing(self.label_spacing)
         self.setLayout(self.base_layout)
 
         # +----------+
@@ -303,12 +307,32 @@ class ItemThumb(FlowWidget):
         # Filename Label =======================================================
         self.file_label = QLabel(Translations["generic.filename"])
         self.file_label.setStyleSheet(ItemThumb.filename_style)
-        self.file_label.setMaximumHeight(self.label_height)
+        if self.label_orientation == 0: # Top Bottom
+            self.file_label.setMaximumHeight(self.label_height) # messes up thumbnails on horiz orientations
+            self.file_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+        if self.label_orientation == 1: # Left Right
+            self.file_label.setMaximumWidth(self.label_width) # messes up thumbnails on vert orientations
+            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        if self.label_orientation == 2: # Bottom Top
+            self.file_label.setMaximumHeight(self.label_height)
+            self.file_label.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
+        if self.label_orientation == 3: # Right Left
+            self.file_label.setMaximumWidth(self.label_width)
+            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
         if not show_filename_label:
             self.file_label.setHidden(True)
 
-        self.base_layout.addWidget(self.thumb_container)
-        self.base_layout.addWidget(self.file_label)
+        self.base_layout.addWidget(
+            self.thumb_container,
+            1 if self.label_orientation == 2 else 0,
+            1 if self.label_orientation == 3 else 0
+            ) #TB:0,0,LR:0,0,BT:1,0,RL:0,1
+        self.base_layout.addWidget(
+            self.file_label,
+            1 if self.label_orientation == 0 else 0,
+            1 if self.label_orientation == 1 else 0
+            ) #TB:1,0,LR:0,1,BT:0,0,RL:0,0
+        
         # NOTE: self.item_id seems to act as a reference here and does not need to be updated inside
         # QtDriver.update_thumbs() while item_thumb.delete_action does.
         # If this behavior ever changes, move this method back to QtDriver.update_thumbs().
@@ -415,11 +439,36 @@ class ItemThumb(FlowWidget):
         if set_visible:
             if self.file_label.isHidden():
                 self.file_label.setHidden(False)
-            self.setFixedHeight(self.thumb_size[1] + self.label_height + self.label_spacing)
+            if self.label_orientation % 2 == 0:
+                self.setFixedHeight(self.thumb_size[1] + self.label_height + self.label_spacing)
+            if self.label_orientation % 2 == 1:
+                self.setFixedWidth(self.thumb_size[0] + self.label_width + self.label_spacing)
         else:
             self.file_label.setHidden(True)
             self.setFixedHeight(self.thumb_size[1])
+            self.setFixedWidth(self.thumb_size[0])
         self.show_filename_label = set_visible
+
+    #def set_label_orientation(self, orientation: type = 0 or bottom):
+    #"""Set the orientation of the thumbnail label, in reference to the thumbnail.
+    #
+    #Args:
+    #   orientation (type):
+    #"""
+    #
+    #def set_label_overflow(self, overflow: type):
+    #"""Set the behavior of the thumbnail label when the text overflows the width.
+    #
+    #Args:
+    #   overflow (type):
+    #"""
+    #def set_label_alignment(self, alignment: int or enum):
+    #"""Set the alignment of the thumbnail label. Changes depending on the orientation.
+    #   Left and Top are 0, Center is 1, Right and Bottom are 2
+    #
+    #Args:
+    #   alignment (int or enum): Alignment of the thumbnail label, 0, 1, 2.
+    #"""
 
     def update_thumb(self, image: QPixmap | None = None, file_path: Path | None = None):
         """Update attributes of a thumbnail element."""

@@ -637,6 +637,27 @@ class QtDriver(DriverMixin, QObject):
         # Search Field
         self.main_window.search_field.returnPressed.connect(_update_browsing_state)
 
+        ## 3 Thumbnail Label Dropdowns (only present if Show Filenames in Grid == true)
+        # no enums, try replicating thumbnail size
+        #somevisibilitycode
+        #if self.settings.show_filenames_in_grid: {rest of code}
+
+        ## Label Orientation Dropdown
+        #self.main_window.label_orientation_combobox.setCurrentIndex(***)
+        #self.main_window.label_orientation_combobox.currentIndexChanged.connect(
+        #   self.label_orientation_callback
+        #)
+        ## Label Overflow Dropdown
+        #self.main_window.label_overflow_combobox.setCurrentIndex(***)
+        #self.main_window.label_overflow_combobox.currentIndexChanged.connect(
+        #   self.label_overflow_callback
+        #)
+        ## Label Alignment Dropdown
+        #self.main_window.label_alignment_combobox.setCurrentIndex(***)
+        #self.main_window.label_alignment_combobox.currentIndexChanged.connect(
+        #   self.label_alignment_callback
+        #)
+
         # Sorting Dropdowns
         self.main_window.sorting_mode_combobox.setCurrentIndex(
             list(SortingModeEnum).index(self.browsing_history.current.sorting_mode)
@@ -1151,6 +1172,8 @@ class QtDriver(DriverMixin, QObject):
             it.thumb_size = (self.main_window.thumb_size, self.main_window.thumb_size)
             it.setFixedSize(self.main_window.thumb_size, self.main_window.thumb_size)
             it.thumb_button.thumb_size = (self.main_window.thumb_size, self.main_window.thumb_size)
+            it.label_width = it.thumb_size[0]
+            it.file_label.setMaximumWidth(it.label_width)
             it.set_filename_visibility(it.show_filename_label)
         self.main_window.thumb_layout.setSpacing(
             min(self.main_window.thumb_size // spacing_divisor, min_spacing)
