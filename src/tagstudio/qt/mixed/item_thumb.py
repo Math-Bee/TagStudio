@@ -123,7 +123,7 @@ class ItemThumb(FlowWidget):
         self.label_height = 12
         self.label_width = thumb_size[0]
         self.label_spacing = 4
-        self.label_orientation = 3 #TB:0,LR:1,BT:2,RL:3
+        self.label_orientation = 0 #TB:0,LR:1,BT:2,RL:3
         self.setMinimumSize(*thumb_size)
         self.setMaximumSize(*thumb_size)
         self.setMouseTracking(True)
@@ -439,23 +439,33 @@ class ItemThumb(FlowWidget):
         if set_visible:
             if self.file_label.isHidden():
                 self.file_label.setHidden(False)
-            if self.label_orientation % 2 == 0:
-                self.setFixedHeight(self.thumb_size[1] + self.label_height + self.label_spacing)
-            if self.label_orientation % 2 == 1:
-                self.setFixedWidth(self.thumb_size[0] + self.label_width + self.label_spacing)
+            self.set_label_orientation(self.label_orientation)
         else:
             self.file_label.setHidden(True)
-            self.setFixedHeight(self.thumb_size[1])
-            self.setFixedWidth(self.thumb_size[0])
+            self.setFixedSize(self.thumb_size[0], self.thumb_size[1])
         self.show_filename_label = set_visible
 
-    #def set_label_orientation(self, orientation: type = 0 or bottom):
-    #"""Set the orientation of the thumbnail label, in reference to the thumbnail.
-    #
-    #Args:
-    #   orientation (type):
-    #"""
-    #
+    def set_label_orientation(self, orientation: int):
+        """Set the orientation of the filename label, in reference to the thumbnail.
+    
+        Args:
+            orientation (type):
+        """
+        if orientation % 2 == 0: # Vertical Orientations
+                self.setFixedHeight(self.thumb_size[1] + self.label_height + self.label_spacing)
+                self.file_label.setMaximumHeight(self.label_height) # messes up thumbnails on horiz orientations
+        if orientation % 2 == 1: # Horizontal Orientations
+                self.setFixedWidth(self.thumb_size[0] + self.label_width + self.label_spacing)
+                self.file_label.setMaximumWidth(self.label_width) # messes up thumbnails on vert orientations
+        if orientation == 0: # Top Bottom
+            self.file_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+        if orientation == 1: # Left Right
+            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        if orientation == 2: # Bottom Top
+            self.file_label.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
+        if orientation == 3: # Right Left
+            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        self.label_orientation = orientation
     #def set_label_overflow(self, overflow: type):
     #"""Set the behavior of the thumbnail label when the text overflows the width.
     #
