@@ -124,6 +124,8 @@ class ItemThumb(FlowWidget):
         self.label_width = thumb_size[0]
         self.label_spacing = 4
         self.label_orientation = 0 #TB:0,LR:1,BT:2,RL:3
+        self.label_alignment = Qt.AlignLeft | Qt.AlignVCenter #[Horiz Qt.Align, Vert Qt.Align]
+        #note: this is to save the alignment, in case user switches back
         self.setMinimumSize(*thumb_size)
         self.setMaximumSize(*thumb_size)
         self.setMouseTracking(True)
@@ -307,18 +309,8 @@ class ItemThumb(FlowWidget):
         # Filename Label =======================================================
         self.file_label = QLabel(Translations["generic.filename"])
         self.file_label.setStyleSheet(ItemThumb.filename_style)
-        if self.label_orientation == 0: # Top Bottom
-            self.file_label.setMaximumHeight(self.label_height) # messes up thumbnails on horiz orientations
-            self.file_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-        if self.label_orientation == 1: # Left Right
-            self.file_label.setMaximumWidth(self.label_width) # messes up thumbnails on vert orientations
-            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
-        if self.label_orientation == 2: # Bottom Top
-            self.file_label.setMaximumHeight(self.label_height)
-            self.file_label.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
-        if self.label_orientation == 3: # Right Left
-            self.file_label.setMaximumWidth(self.label_width)
-            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        self.set_label_orientation(self.label_orientation)
+        # set_label_alignment is already called within set_label_orientation for neccessary reasons
         if not show_filename_label:
             self.file_label.setHidden(True)
 
@@ -449,7 +441,7 @@ class ItemThumb(FlowWidget):
         """Set the orientation of the filename label, in reference to the thumbnail.
     
         Args:
-            orientation (type):
+            orientation (int):
         """
         if orientation % 2 == 0: # Vertical Orientations
                 self.setFixedHeight(self.thumb_size[1] + self.label_height + self.label_spacing)
@@ -457,27 +449,39 @@ class ItemThumb(FlowWidget):
         if orientation % 2 == 1: # Horizontal Orientations
                 self.setFixedWidth(self.thumb_size[0] + self.label_width + self.label_spacing)
                 self.file_label.setMaximumWidth(self.label_width) # messes up thumbnails on vert orientations
-        if orientation == 0: # Top Bottom
-            self.file_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-        if orientation == 1: # Left Right
-            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
-        if orientation == 2: # Bottom Top
-            self.file_label.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
-        if orientation == 3: # Right Left
-            self.file_label.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+        self.set_label_alignment(self.label_alignment, orientation)
         self.label_orientation = orientation
+    
+    def set_label_alignment(self, alignment: Qt.AlignmentFlag, orientation: int):
+        """Set the alignment of the thumbnail label. Vertical alignments
+                only applied when orientation is horizontal, and vice versa.
+    
+        Args:
+            alignment (Qt.AlignmentFlag): Alignment of thumbnail label
+            orientation (int): . Label alignment depends on the orientation of the label
+        """
+        if orientation == 0: # Top Bottom
+            alignment = alignment & Qt.AlignHorizontal_Mask
+            self.file_label.setAlignment(Qt.AlignTop | alignment)
+            self.label_alignment = (self.label_alignment & Qt.AlignVertical_Mask) | alignment
+        if orientation == 1: # Left Right
+            alignment = alignment & Qt.AlignVertical_Mask
+            self.file_label.setAlignment(alignment | Qt.AlignLeft)
+            self.label_alignment = (self.label_alignment & Qt.AlignHorizontal_Mask) | alignment
+        if orientation == 2: # Bottom Top
+            alignment = alignment & Qt.AlignHorizontal_Mask
+            self.file_label.setAlignment(Qt.AlignBottom | alignment)
+            self.label_alignment = (self.label_alignment & Qt.AlignVertical_Mask) | alignment
+        if orientation == 3: # Right Left
+            alignment = alignment & Qt.AlignVertical_Mask
+            self.file_label.setAlignment(alignment | Qt.AlignRight)
+            self.label_alignment = (self.label_alignment & Qt.AlignHorizontal_Mask) | alignment
+        
     #def set_label_overflow(self, overflow: type):
     #"""Set the behavior of the thumbnail label when the text overflows the width.
     #
     #Args:
     #   overflow (type):
-    #"""
-    #def set_label_alignment(self, alignment: int or enum):
-    #"""Set the alignment of the thumbnail label. Changes depending on the orientation.
-    #   Left and Top are 0, Center is 1, Right and Bottom are 2
-    #
-    #Args:
-    #   alignment (int or enum): Alignment of the thumbnail label, 0, 1, 2.
     #"""
 
     def update_thumb(self, image: QPixmap | None = None, file_path: Path | None = None):
