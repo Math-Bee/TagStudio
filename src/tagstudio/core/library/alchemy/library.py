@@ -61,9 +61,11 @@ from tagstudio.core.constants import (
     RESERVED_NAMESPACE_PREFIX,
     RESERVED_TAG_END,
     RESERVED_TAG_START,
+    RESERVED_FIELD_TAGS,
     TAG_ARCHIVED,
     TAG_FAVORITE,
     TAG_META,
+    TAG_FIELD,
     TS_FOLDER_NAME,
 )
 from tagstudio.core.enums import LibraryPrefs
@@ -166,12 +168,32 @@ def get_default_tags() -> tuple[Tag, ...]:
         color_slug="yellow",
         color_namespace="tagstudio-standard",
     )
+    field_tag = Tag(
+        id=TAG_FIELD,
+        name="Field",
+        aliases={
+            TagAlias(name="Fields"),
+            TagAlias(name="FIELD"),
+            TagAlias(name="FIELDS")
+        }
+    )
+    f = []
+    for field in FieldID:
+        f.append(
+            Tag(
+                id=RESERVED_FIELD_TAGS+field.value.id,
+                name=field.value.name,
+                aliases={TagAlias(name=field.name)},
+                parent_tags={field_tag}
+            )
+        )
 
-    return archive_tag, favorite_tag, meta_tag
+    return archive_tag, favorite_tag, meta_tag, field_tag, *f
 
 
 # The difference in the number of default JSON tags vs default tags in the current version.
 DEFAULT_TAG_DIFF: int = len(get_default_tags()) - len([TAG_ARCHIVED, TAG_FAVORITE])
+# TODO: update this
 
 
 @dataclass(frozen=True)
@@ -556,6 +578,8 @@ class Library:
                     self.__apply_db102_repairs(session)
                 if loaded_db_version < 103:
                     self.__apply_db103_default_data(session)
+                if loaded_db_version < 104:
+                    self.__apply_db104_default_data(session)
 
                 # Convert file extension list to ts_ignore file, if a .ts_ignore file does not exist
                 self.migrate_sql_to_ts_ignore(library_dir)
@@ -729,6 +753,40 @@ class Library:
         except Exception as e:
             logger.error(
                 "[Library][Migration] Could not update archived tag to be hidden!",
+                error=e,
+            )
+            session.rollback()
+    
+    def __apply_db104_default_data(self, session: Session):
+        """Apply default data changes introduced in DB_VERSION 104."""
+        try:
+            field_tag = Tag(
+                id=TAG_FIELD,
+                name="Field",
+                aliases={
+                    TagAlias(name="Fields"),
+                    TagAlias(name="FIELD"),
+                    TagAlias(name="FIELDS")
+                }
+            )
+            session.add(field_tag)
+            session.commit()
+            logger.info("[Library][Migration] Added field tag")
+            for field in FieldID:
+                session.add(
+                    Tag(
+                        id=RESERVED_FIELD_TAGS+field.value.id,
+                        name=field.value.name,
+                        aliases={TagAlias(name=field.name)},
+                        parent_tags={field_tag}
+                    )
+                )
+            session.commit()
+            logger.info("[Library][Migration] Added field titles as tags")
+            session.commit()
+        except Exception as e:
+            logger.error(
+                "[Library][Migration] Could not add field titles as tags!",
                 error=e,
             )
             session.rollback()
