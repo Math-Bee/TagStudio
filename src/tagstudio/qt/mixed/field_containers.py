@@ -483,10 +483,10 @@ class FieldContainers(QWidget):
         remove_mb.setIcon(QMessageBox.Icon.Warning)
         cancel_button = remove_mb.addButton(QMessageBox.StandardButton.Cancel)
         cancel_button.setText(Translations["generic.cancel_alt"])
-        remove_mb.addButton(QMessageBox.StandardButton.Ok).setText(
+        remove_mb.addButton(QMessageBox.StandardButton.Discard).setText(
             Translations["generic.remove_alt"]
         )
         remove_mb.setEscapeButton(cancel_button)
         result = remove_mb.exec()
-        if result == QMessageBox.StandardButton.Ok:
+        if result == QMessageBox.StandardButton.Discard:
             callback()
