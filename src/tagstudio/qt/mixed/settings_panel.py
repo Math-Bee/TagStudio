@@ -179,16 +179,14 @@ class SettingsPanel(PanelWidget):
         # Show Filepath
         self.filepath_combobox = QComboBox()
         self.filepath_combobox.addItem(
-            Translations["settings.filepath.option.full"],
-            ShowFilepathOption.SHOW_FULL_PATHS
+            Translations["settings.filepath.option.full"], ShowFilepathOption.SHOW_FULL_PATHS
         )
         self.filepath_combobox.addItem(
             Translations["settings.filepath.option.relative"],
-            ShowFilepathOption.SHOW_RELATIVE_PATHS
+            ShowFilepathOption.SHOW_RELATIVE_PATHS,
         )
         self.filepath_combobox.addItem(
-            Translations["settings.filepath.option.name"],
-            ShowFilepathOption.SHOW_FILENAMES_ONLY
+            Translations["settings.filepath.option.name"], ShowFilepathOption.SHOW_FILENAMES_ONLY
         )
         filepath_option: ShowFilepathOption = self.driver.settings.show_filepath
         if self.filepath_combobox.findData(filepath_option) == -1:
@@ -199,16 +197,14 @@ class SettingsPanel(PanelWidget):
         # Tag Click Action
         self.tag_click_action_combobox = QComboBox()
         self.tag_click_action_combobox.addItem(
-            Translations["settings.tag_click_action.open_edit"],
-            TagClickActionOption.OPEN_EDIT
+            Translations["settings.tag_click_action.open_edit"], TagClickActionOption.OPEN_EDIT
         )
         self.tag_click_action_combobox.addItem(
-            Translations["settings.tag_click_action.set_search"],
-            TagClickActionOption.SET_SEARCH
+            Translations["settings.tag_click_action.set_search"], TagClickActionOption.SET_SEARCH
         )
         self.tag_click_action_combobox.addItem(
             Translations["settings.tag_click_action.add_to_search"],
-            TagClickActionOption.ADD_TO_SEARCH
+            TagClickActionOption.ADD_TO_SEARCH,
         )
         tag_click_action = self.driver.settings.tag_click_action
         if self.tag_click_action_combobox.findData(tag_click_action) == -1:
@@ -234,15 +230,9 @@ class SettingsPanel(PanelWidget):
 
         # Splash Screen
         self.splash_combobox = QComboBox()
-        self.splash_combobox.addItem(
-            Translations["settings.splash.option.default"], Splash.DEFAULT
-        )
-        self.splash_combobox.addItem(
-            Translations["settings.splash.option.random"], Splash.RANDOM
-        )
-        self.splash_combobox.addItem(
-            Translations["settings.splash.option.classic"], Splash.CLASSIC
-        )
+        self.splash_combobox.addItem(Translations["settings.splash.option.default"], Splash.DEFAULT)
+        self.splash_combobox.addItem(Translations["settings.splash.option.random"], Splash.RANDOM)
+        self.splash_combobox.addItem(Translations["settings.splash.option.classic"], Splash.CLASSIC)
         self.splash_combobox.addItem(
             Translations["settings.splash.option.goo_gears"], Splash.GOO_GEARS
         )
