@@ -481,10 +481,12 @@ class FieldContainers(QWidget):
         remove_mb.setText(prompt)
         remove_mb.setWindowTitle(Translations["library.field.remove"])
         remove_mb.setIcon(QMessageBox.Icon.Warning)
-        cancel_button = remove_mb.addButton(QMessageBox.Cancel)
+        cancel_button = remove_mb.addButton(QMessageBox.StandardButton.Cancel)
         cancel_button.setText(Translations["generic.cancel_alt"])
-        remove_mb.addButton(QMessageBox.Ok).setText(Translations["generic.remove_alt"])
+        remove_mb.addButton(QMessageBox.StandardButton.Ok).setText(
+            Translations["generic.remove_alt"]
+        )
         remove_mb.setEscapeButton(cancel_button)
         result = remove_mb.exec()
-        if result == QMessageBox.Ok:
+        if result == QMessageBox.StandardButton.Ok:
             callback()

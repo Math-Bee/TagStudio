@@ -64,12 +64,14 @@ class TagDatabasePanel(TagSearchPanel):
             Translations["tag.remove"],
             Translations.format("tag.confirm_delete", tag_name=self.lib.tag_display_name(tag)),
         )
-        message_box.addButton(QMessageBox.Ok).setText(Translations["generic.remove"])
-        message_box.addButton(QMessageBox.Cancel).setText(Translations["generic.cancel"])
+        message_box.addButton(QMessageBox.StandardButton.Ok).setText(Translations["generic.remove"])
+        message_box.addButton(QMessageBox.StandardButton.Cancel).setText(
+            Translations["generic.cancel"]
+        )
 
         result = message_box.exec()
 
-        if result != QMessageBox.Ok:  # type: ignore
+        if result != QMessageBox.StandardButton.Ok:
             return
 
         self.lib.remove_tag(tag.id)
