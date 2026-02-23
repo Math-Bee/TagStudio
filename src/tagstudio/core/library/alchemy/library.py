@@ -99,6 +99,7 @@ from tagstudio.core.library.alchemy.models import (
     Namespace,
     Preferences,
     Tag,
+    TagType,
     TagAlias,
     TagColorGroup,
     ValueType,
@@ -527,6 +528,19 @@ class Library:
                     logger.debug("ValueType already exists", field=field)
                     session.rollback()
 
+            for index, tagtype in enumerate(FieldTypeEnum):
+                try:
+                    session.add(
+                        TagType(
+                            id=index,
+                            name=tagtype.value
+                        )
+                    )
+                    session.commit()
+                except IntegrityError:
+                    logger.debug("TagType already exists", type=tagtype)
+                    session.rollback()
+
             # check if folder matching current path exists already
             self.folder = session.scalar(select(Folder).where(Folder.path == library_dir))
             if not self.folder:
@@ -565,6 +579,8 @@ class Library:
                     self.__apply_db9_schema_changes(session)
                 if loaded_db_version < 103:
                     self.__apply_db103_schema_changes(session)
+                if loaded_db_version < 104:
+                    self.__apply_db104_schema_changes(session)
                 if loaded_db_version == 6:
                     self.__apply_repairs_for_db6(session)
 
@@ -753,6 +769,20 @@ class Library:
         except Exception as e:
             logger.error(
                 "[Library][Migration] Could not update archived tag to be hidden!",
+                error=e,
+            )
+            session.rollback()
+
+    def __apply_db104_schema_changes(self, session: Session):
+        """Apply database schema changes introduced in DB_VERSION 104."""
+        add_type_column = text("ALTER TABLE tags ADD COLUMN type INTEGER NOT NULL DEFAULT 0")
+        try:
+            session.execute(add_type_column)
+            session.commit()
+            logger.info("[Library][Migration] Added type column to tags table")
+        except Exception as e:
+            logger.error(
+                "[Library][Migration] Could not create type column in tags table!",
                 error=e,
             )
             session.rollback()
