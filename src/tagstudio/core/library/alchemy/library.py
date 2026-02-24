@@ -185,7 +185,8 @@ def get_default_tags() -> tuple[Tag, ...]:
                 id=RESERVED_FIELD_TAGS+field.value.id,
                 name=field.value.name,
                 aliases={TagAlias(name=field.name)},
-                parent_tags={field_tag}
+                parent_tags={field_tag},
+                is_category=True
             )
         )
 
@@ -803,13 +804,21 @@ class Library:
             session.add(field_tag)
             session.commit()
             logger.info("[Library][Migration] Added field tag")
+        except Exception as e:
+            logger.error(
+                "[Library][Migration] Could not add field tag!",
+                error=e,
+            )
+            session.rollback()
+        try:
             for field in FieldID:
                 session.add(
                     Tag(
                         id=RESERVED_FIELD_TAGS+field.value.id,
                         name=field.value.name,
                         aliases={TagAlias(name=field.name)},
-                        parent_tags={field_tag}
+                        parent_tags={field_tag},
+                        is_category=True
                     )
                 )
             session.commit()
