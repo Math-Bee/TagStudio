@@ -24,7 +24,7 @@ logger = structlog.get_logger()
 
 
 def test_library_add_alias(library: Library, generate_tag: Callable[..., Tag]):
-    tag = unwrap(library.add_tag(generate_tag("xxx", id=123)))
+    tag = unwrap(library.add_tag(generate_tag("xxx", id=321)))
 
     parent_ids: set[int] = set()
     alias_ids: set[int] = set()
@@ -38,7 +38,7 @@ def test_library_add_alias(library: Library, generate_tag: Callable[..., Tag]):
 
 
 def test_library_get_alias(library: Library, generate_tag: Callable[..., Tag]):
-    tag = unwrap(library.add_tag(generate_tag("xxx", id=123)))
+    tag = unwrap(library.add_tag(generate_tag("xxx", id=321)))
 
     parent_ids: set[int] = set()
     alias_ids: list[int] = []
@@ -53,7 +53,7 @@ def test_library_get_alias(library: Library, generate_tag: Callable[..., Tag]):
 
 
 def test_library_update_alias(library: Library, generate_tag: Callable[..., Tag]):
-    tag: Tag = unwrap(library.add_tag(generate_tag("xxx", id=123)))
+    tag: Tag = unwrap(library.add_tag(generate_tag("xxx", id=321)))
 
     parent_ids: set[int] = set()
     alias_ids: list[int] = []
@@ -95,8 +95,8 @@ def test_create_tag(library: Library, generate_tag: Callable[..., Tag]):
     assert library.add_tag(generate_tag("foo", id=1000)) is None
 
     # new tag name
-    tag = unwrap(library.add_tag(generate_tag("xxx", id=123)))
-    assert tag.id == 123
+    tag = unwrap(library.add_tag(generate_tag("xxx", id=321)))
+    assert tag.id == 321
 
     tag_inc = unwrap(library.add_tag(generate_tag("yyy")))
     assert tag_inc.id > 1000
@@ -107,8 +107,8 @@ def test_tag_self_parent(library: Library, generate_tag: Callable[..., Tag]):
     assert library.add_tag(generate_tag("foo", id=1000)) is None
 
     # new tag name
-    tag = unwrap(library.add_tag(generate_tag("xxx", id=123)))
-    assert tag.id == 123
+    tag = unwrap(library.add_tag(generate_tag("xxx", id=321)))
+    assert tag.id == 321
 
     library.update_tag(tag, {tag.id}, [], [])
     tag = unwrap(library.get_tag(tag.id))
@@ -170,7 +170,7 @@ def test_parents_add(library: Library, generate_tag: Callable[..., Tag]):
 
 
 def test_remove_tag(library: Library, generate_tag: Callable[..., Tag]):
-    tag = unwrap(library.add_tag(generate_tag("food", id=123)))
+    tag = unwrap(library.add_tag(generate_tag("food", id=321)))
 
     tag_count = len(library.tags)
 

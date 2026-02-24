@@ -58,14 +58,14 @@ from tagstudio.core.constants import (
     BACKUP_FOLDER_NAME,
     IGNORE_NAME,
     LEGACY_TAG_FIELD_IDS,
+    RESERVED_FIELD_TAGS,
     RESERVED_NAMESPACE_PREFIX,
     RESERVED_TAG_END,
     RESERVED_TAG_START,
-    RESERVED_FIELD_TAGS,
     TAG_ARCHIVED,
     TAG_FAVORITE,
-    TAG_META,
     TAG_FIELD,
+    TAG_META,
     TS_FOLDER_NAME,
 )
 from tagstudio.core.enums import LibraryPrefs
@@ -99,9 +99,9 @@ from tagstudio.core.library.alchemy.models import (
     Namespace,
     Preferences,
     Tag,
-    TagType,
     TagAlias,
     TagColorGroup,
+    TagType,
     ValueType,
     Version,
 )
@@ -284,6 +284,7 @@ class Library:
                     color_namespace=color_namespace,
                     color_slug=color_slug,
                     disambiguation_id=disambiguation_id,
+                    type=0
                 )
             )
             # Apply user edits to built-in JSON tags.
@@ -1544,6 +1545,7 @@ class Library:
         parent_ids: list[int] | set[int] | None = None,
         alias_names: list[str] | set[str] | None = None,
         alias_ids: list[int] | set[int] | None = None,
+        type: int = 0,
     ) -> Tag | None:
         with Session(self.engine, expire_on_commit=False) as session:
             try:
@@ -1822,9 +1824,10 @@ class Library:
         parent_ids: list[int] | set[int] | None = None,
         alias_names: list[str] | set[str] | None = None,
         alias_ids: list[int] | set[int] | None = None,
+        type: int = 0,
     ) -> None:
         """Edit a Tag in the Library."""
-        self.add_tag(tag, parent_ids, alias_names, alias_ids)
+        self.add_tag(tag, parent_ids, alias_names, alias_ids, type)
 
     def update_color(self, old_color_group: TagColorGroup, new_color_group: TagColorGroup) -> None:
         """Update a TagColorGroup in the Library. If it doesn't already exist, create it."""

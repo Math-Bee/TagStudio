@@ -17,7 +17,7 @@ CWD = Path(__file__).parent
 sys.path.insert(0, str(CWD.parent))
 
 from tagstudio.core.constants import THUMB_CACHE_NAME, TS_FOLDER_NAME
-from tagstudio.core.library.alchemy.library import Library
+from tagstudio.core.library.alchemy.library import Library, get_default_tags
 from tagstudio.core.library.alchemy.models import Entry, Tag
 from tagstudio.core.utils.types import unwrap
 from tagstudio.qt.thumb_grid_layout import ThumbGridLayout
@@ -56,7 +56,7 @@ def file_mediatypes_library():
     )
 
     assert lib.add_entries([entry1, entry2, entry3])
-    assert len(lib.tags) == 3
+    assert len(lib.tags) == len(get_default_tags())
 
     return lib
 
@@ -130,7 +130,7 @@ def library(request, library_dir: Path):  # pyright: ignore
     assert lib.add_tags_to_entries(entry2.id, tag2.id)
 
     assert lib.add_entries([entry, entry2])
-    assert len(lib.tags) == 6
+    assert len(lib.tags) == 3 + len(get_default_tags())
 
     yield lib
 

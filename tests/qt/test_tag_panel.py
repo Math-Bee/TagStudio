@@ -5,7 +5,7 @@
 
 from pytestqt.qtbot import QtBot
 
-from tagstudio.core.library.alchemy.library import Library
+from tagstudio.core.library.alchemy.library import Library, get_default_tags
 from tagstudio.core.library.alchemy.models import Tag
 from tagstudio.qt.mixed.build_tag import BuildTagPanel
 from tagstudio.qt.ts_qt import QtDriver
@@ -19,7 +19,7 @@ def test_tag_panel(qtbot: QtBot, library: Library):
 
 def test_add_tag_callback(qt_driver: QtDriver):
     # Given
-    assert len(qt_driver.lib.tags) == 6
+    assert len(qt_driver.lib.tags) == 3 + len(get_default_tags())
     qt_driver.add_tag_action_callback()
 
     # When
@@ -30,5 +30,5 @@ def test_add_tag_callback(qt_driver: QtDriver):
 
     # Then
     tags: list[Tag] = qt_driver.lib.tags
-    assert len(tags) == 7
+    assert len(tags) == 4 + len(get_default_tags())
     assert "xxx" in {tag.name for tag in tags}

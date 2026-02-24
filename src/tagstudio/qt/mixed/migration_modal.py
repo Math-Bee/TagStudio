@@ -25,14 +25,17 @@ from sqlalchemy.orm import Session
 
 from tagstudio.core.constants import (
     LEGACY_TAG_FIELD_IDS,
+    RESERVED_FIELD_TAGS,
     TAG_ARCHIVED,
     TAG_FAVORITE,
+    TAG_FIELD,
     TAG_META,
     TS_FOLDER_NAME,
 )
 from tagstudio.core.enums import LibraryPrefs
 from tagstudio.core.library.alchemy import default_color_groups
 from tagstudio.core.library.alchemy.constants import SQL_FILENAME
+from tagstudio.core.library.alchemy.fields import FieldID
 from tagstudio.core.library.alchemy.joins import TagParent
 from tagstudio.core.library.alchemy.library import Library as SqliteLibrary
 from tagstudio.core.library.alchemy.models import Entry, TagAlias
@@ -346,6 +349,23 @@ class JsonMigrationModal(QObject):
         Used to preserve user-modified built-in tags and to
         match values between JSON and SQL during parity checking.
         """
+        # db104: Add "Field" tag & Field tags
+        field_tag: JsonTag = JsonTag(TAG_FIELD, "Field", "", ["Fields", "FIELD", "FIELDS"], [], "")
+        self.json_lib.tags.append(field_tag)
+        self.json_lib._map_tag_id_to_index(field_tag, len(self.json_lib.tags) - 1)
+
+        for field in FieldID:
+            new_field: JsonTag = JsonTag(
+                RESERVED_FIELD_TAGS+field.value.id,
+                field.value.name,
+                "",
+                [field.name],
+                [TAG_FIELD],
+                "",
+            )
+            self.json_lib.tags.append(new_field)
+            self.json_lib._map_tag_id_to_index(new_field, len(self.json_lib.tags) - 1)
+
         # v9.5.0: Add "Meta Tags" tag and parent that to "Archived" and "Favorite".
         meta_tags: JsonTag = JsonTag(TAG_META, "Meta Tags", "", ["Meta", "Meta Tag"], [], "")
         # self.json_lib.add_tag_to_library(meta_tags)
