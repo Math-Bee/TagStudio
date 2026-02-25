@@ -179,10 +179,10 @@ def get_default_tags() -> tuple[Tag, ...]:
         }
     )
     f = []
-    for field in FieldID:
+    for index, field in enumerate(FieldID):
         f.append(
             Tag(
-                id=RESERVED_FIELD_TAGS+field.value.id,
+                id=RESERVED_FIELD_TAGS+index,
                 name=field.value.name,
                 aliases={TagAlias(name=field.name)},
                 parent_tags={field_tag},
@@ -810,26 +810,27 @@ class Library:
                 error=e,
             )
             session.rollback()
-        try:
-            for field in FieldID:
+        for index, field in enumerate(FieldID):
+            try:
                 session.add(
                     Tag(
-                        id=RESERVED_FIELD_TAGS+field.value.id,
+                        id=RESERVED_FIELD_TAGS+index,
                         name=field.value.name,
                         aliases={TagAlias(name=field.name)},
                         parent_tags={field_tag},
                         is_category=True
                     )
                 )
-            session.commit()
-            logger.info("[Library][Migration] Added field titles as tags")
-            session.commit()
-        except Exception as e:
-            logger.error(
-                "[Library][Migration] Could not add field titles as tags!",
-                error=e,
-            )
-            session.rollback()
+                session.commit()
+            except Exception as e:
+                logger.error(
+                    "[Library][Migration] Could not add field title as tag!",
+                    error=e,
+                    field=field,
+                    index=index
+                )
+                session.rollback()
+        logger.info("[Library][Migration] Added field titles as tags")
 
     def migrate_sql_to_ts_ignore(self, library_dir: Path):
         # Do not continue if existing '.ts_ignore' file is found

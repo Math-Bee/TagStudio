@@ -354,9 +354,9 @@ class JsonMigrationModal(QObject):
         self.json_lib.tags.append(field_tag)
         self.json_lib._map_tag_id_to_index(field_tag, len(self.json_lib.tags) - 1)
 
-        for field in FieldID:
+        for index, field in enumerate(FieldID):
             new_field: JsonTag = JsonTag(
-                RESERVED_FIELD_TAGS+field.value.id,
+                RESERVED_FIELD_TAGS+index,
                 field.value.name,
                 "",
                 [field.name],
