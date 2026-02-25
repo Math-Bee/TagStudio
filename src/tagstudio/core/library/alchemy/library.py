@@ -101,7 +101,7 @@ from tagstudio.core.library.alchemy.models import (
     Tag,
     TagAlias,
     TagColorGroup,
-    TagType,
+    #TagType,
     ValueType,
     Version,
 )
@@ -530,18 +530,18 @@ class Library:
                     logger.debug("ValueType already exists", field=field)
                     session.rollback()
 
-            for index, tagtype in enumerate(FieldTypeEnum):
-                try:
-                    session.add(
-                        TagType(
-                            id=index,
-                            name=tagtype.value
-                        )
-                    )
-                    session.commit()
-                except IntegrityError:
-                    logger.debug("TagType already exists", type=tagtype)
-                    session.rollback()
+            #for index, tagtype in enumerate(FieldTypeEnum):
+            #    try:
+            #        session.add(
+            #            TagType(
+            #                id=index,
+            #                name=tagtype.value
+            #            )
+            #        )
+            #        session.commit()
+            #    except IntegrityError:
+            #        logger.debug("TagType already exists", type=tagtype)
+            #        session.rollback()
 
             # check if folder matching current path exists already
             self.folder = session.scalar(select(Folder).where(Folder.path == library_dir))

@@ -107,7 +107,7 @@ class Tag(Base):
         back_populates="parent_tags",
     )
     disambiguation_id: Mapped[int | None]
-    type: Mapped[int] = mapped_column(ForeignKey("tag_type.id"))
+    type: Mapped[int] #= mapped_column(ForeignKey("tag_type.id"))
 
     __table_args__ = (
         ForeignKeyConstraint(
@@ -279,31 +279,31 @@ class Entry(Base):
         self.tags.remove(tag)
 
 
-class TagType(Base):
-    """Define Tag Types in the Library.
-
-    Example:
-    - id: 0 (this is the id of the type, referenced by `tags`)
-    - name: Text Line (this field is the human readable name)
-
-    """
-
-    __tablename__ = "tag_type"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
-
+#class TagType(Base):
+#    """Define Tag Types in the Library.
+#
+#    Example:
+#    - id: 0 (this is the id of the type, referenced by `tags`)
+#    - name: Text Line (this field is the human readable name)
+#
+#    """
+#
+#    __tablename__ = "tag_type"
+#
+#    id: Mapped[int] = mapped_column(primary_key=True)
+#    name: Mapped[str]
+#
     # relationship with `tags`
     #tags: Mapped[list[Tag]] = relationship("Tag")
-
-    def __init__(
-        self,
-        id: int,
-        name: str
-    ):
-        self.id = id
-        self.name = name
-        super().__init__()
+#
+#    def __init__(
+#        self,
+#        id: int,
+#        name: str
+#    ):
+#        self.id = id
+#        self.name = name
+#        super().__init__()
 
 
 class ValueType(Base):
